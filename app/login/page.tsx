@@ -31,17 +31,22 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Ensure session is fully established
-        const { data: sessionData } = await supabase.auth.getSession()
+        // Get the session to ensure it's established
+        const { data: { session } } = await supabase.auth.getSession()
         
-        if (sessionData.session) {
-          // Wait a bit for cookies to be properly set
-          await new Promise(resolve => setTimeout(resolve, 500))
-          // Redirect to home - middleware will handle if not authenticated
-          window.location.href = '/'
+        if (session) {
+          // Use router.push with a small delay to ensure cookies are set
+          // Then force a hard navigation if needed
+          router.push('/')
+          // Fallback: if router.push doesn't work, use window.location after a delay
+          setTimeout(() => {
+            if (window.location.pathname === '/login') {
+              window.location.href = '/'
+            }
+          }, 1000)
         } else {
-          // If no session, reload to try again
-          window.location.reload()
+          setError('Session not established. Please try again.')
+          setLoading(false)
         }
       }
     } catch (err) {
