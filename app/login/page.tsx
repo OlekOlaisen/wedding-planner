@@ -18,11 +18,19 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:16',message:'Login attempt started',data:{email,hostname:window.location.hostname,protocol:window.location.protocol},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+    // #endregion
+
     try {
       const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:25',message:'signInWithPassword response',data:{hasError:!!error,hasUser:!!data?.user,errorMessage:error?.message,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+      // #endregion
 
       if (error) {
         setError(error.message)
@@ -34,6 +42,14 @@ export default function LoginPage() {
         // Verify session is established
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
+        // #region agent log
+        const cookiesBeforeRedirect = document.cookie.split('; ').map(c => {
+          const [name, ...rest] = c.split('=');
+          return {name, hasValue:rest.length > 0, valueLength:rest.join('=').length};
+        });
+        fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:35',message:'Session check before redirect',data:{hasSession:!!session,hasSessionError:!!sessionError,sessionError:sessionError?.message,accessToken:session?.access_token?.substring(0,20)+'...',cookieCount:cookiesBeforeRedirect.length,cookies:cookiesBeforeRedirect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D'})}).catch(()=>{});
+        // #endregion
+        
         if (sessionError) {
           console.error('Session error:', sessionError)
           setError('Failed to establish session. Please try again.')
@@ -42,9 +58,19 @@ export default function LoginPage() {
         }
         
         if (session) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:47',message:'Starting redirect timer',data:{delay:200,currentPath:window.location.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,E'})}).catch(()=>{});
+          // #endregion
           // Wait for cookies to be set by the browser client
           // Then do a full page reload to ensure middleware sees the cookies
           setTimeout(() => {
+            // #region agent log
+            const cookiesAtRedirect = document.cookie.split('; ').map(c => {
+              const [name, ...rest] = c.split('=');
+              return {name, hasValue:rest.length > 0, valueLength:rest.join('=').length};
+            });
+            fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:49',message:'Executing redirect',data:{target:'/',cookieCount:cookiesAtRedirect.length,cookies:cookiesAtRedirect,supabaseCookies:cookiesAtRedirect.filter(c=>c.name.includes('supabase')||c.name.includes('sb-'))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D'})}).catch(()=>{});
+            // #endregion
             window.location.href = '/'
           }, 200)
         } else {
@@ -53,6 +79,9 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/login/page.tsx:56',message:'Login exception',data:{errorMessage:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       console.error('Login error:', err)
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
