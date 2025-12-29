@@ -39,14 +39,17 @@ export default function Home() {
 
   useEffect(() => {
     const initialize = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUserEmail(user.email || null)
-        await loadGuests()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error || !user) {
+        // Redirect to login if not authenticated
+        router.push('/login')
+        return
       }
+      setUserEmail(user.email || null)
+      await loadGuests()
     }
     initialize()
-  }, [supabase, loadGuests])
+  }, [supabase, router, loadGuests])
 
   const handleAddGuest = useCallback(async (guestData: Omit<Guest, 'id' | 'finalGrade'>) => {
     try {

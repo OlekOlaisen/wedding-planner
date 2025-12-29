@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -13,6 +13,17 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [supabase, router])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,30 +54,22 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // Verify session is established
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        // Wait a moment for session to be established
+        await new Promise(resolve => setTimeout(resolve, 100))
         
-        if (sessionError) {
-          console.error('Session error:', sessionError)
-          setError('Failed to establish session. Please try again.')
-          setLoading(false)
-          return
-        }
-        
+        // Verify session exists
+        const { data: { session } } = await supabase.auth.getSession()
         if (session) {
-          // Wait for cookies to be set by the browser client
-          // Then do a full page reload to ensure middleware sees the cookies
-          setTimeout(() => {
-            window.location.href = '/'
-          }, 200)
+          // Use window.location for a full page reload to ensure cookies are set
+          window.location.href = '/'
         } else {
           setError('Session not established. Please try again.')
           setLoading(false)
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Signup error:', err)
-      setError('An unexpected error occurred. Please try again.')
+      setError(`An unexpected error occurred: ${err.message}`)
       setLoading(false)
     }
   }
@@ -75,7 +78,7 @@ export default function SignupPage() {
     <div className="auth-container">
       <div className="auth-card">
         <h1>Create Account</h1>
-        <p className="auth-subtitle">Sign up to start planning your wedding</p>
+        <p className="auth-subtitle">Sign up for your wedding planner account</p>
 
         {error && (
           <div className="auth-error">
@@ -106,7 +109,6 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              minLength={6}
               disabled={loading}
             />
           </div>
@@ -120,13 +122,12 @@ export default function SignupPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="••••••••"
-              minLength={6}
               disabled={loading}
             />
           </div>
 
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
 
@@ -140,4 +141,3 @@ export default function SignupPage() {
     </div>
   )
 }
-
