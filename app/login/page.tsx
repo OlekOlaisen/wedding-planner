@@ -10,8 +10,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<string[]>([])
   const router = useRouter()
   const supabase = createClient()
+
+  const addDebugInfo = (msg: string) => {
+    setDebugInfo(prev => [...prev, `${new Date().toISOString()}: ${msg}`])
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,6 +24,7 @@ export default function LoginPage() {
     setLoading(true)
 
     // #region agent log
+    addDebugInfo(`Login started - hostname: ${window.location.hostname}, protocol: ${window.location.protocol}`)
     const logData1 = {location:'app/login/page.tsx:16',message:'Login attempt started',data:{email,hostname:window.location.hostname,protocol:window.location.protocol},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'};
     console.error('[DEBUG LOGIN]', JSON.stringify(logData1));
     fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData1)}).catch(()=>{});
@@ -31,6 +37,7 @@ export default function LoginPage() {
       })
 
       // #region agent log
+      addDebugInfo(`signInWithPassword response - hasError: ${!!error}, hasUser: ${!!data?.user}, userId: ${data?.user?.id || 'none'}`)
       const logData2 = {location:'app/login/page.tsx:25',message:'signInWithPassword response',data:{hasError:!!error,hasUser:!!data?.user,errorMessage:error?.message,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'};
       console.error('[DEBUG LOGIN]', JSON.stringify(logData2));
       fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData2)}).catch(()=>{});
@@ -51,6 +58,8 @@ export default function LoginPage() {
           const [name, ...rest] = c.split('=');
           return {name, hasValue:rest.length > 0, valueLength:rest.join('=').length};
         });
+        const supabaseCookieNames = cookiesBeforeRedirect.filter(c => c.name.includes('supabase') || c.name.includes('sb-')).map(c => c.name);
+        addDebugInfo(`Session check - hasSession: ${!!session}, cookieCount: ${cookiesBeforeRedirect.length}, supabaseCookies: ${supabaseCookieNames.join(', ') || 'none'}`)
         const logData3 = {location:'app/login/page.tsx:35',message:'Session check before redirect',data:{hasSession:!!session,hasSessionError:!!sessionError,sessionError:sessionError?.message,accessToken:session?.access_token?.substring(0,20)+'...',cookieCount:cookiesBeforeRedirect.length,cookies:cookiesBeforeRedirect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B,C,D'};
         console.error('[DEBUG LOGIN]', JSON.stringify(logData3));
         fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData3)}).catch(()=>{});
@@ -77,7 +86,9 @@ export default function LoginPage() {
               const [name, ...rest] = c.split('=');
               return {name, hasValue:rest.length > 0, valueLength:rest.join('=').length};
             });
-            const logData5 = {location:'app/login/page.tsx:49',message:'Executing redirect',data:{target:'/',cookieCount:cookiesAtRedirect.length,cookies:cookiesAtRedirect,supabaseCookies:cookiesAtRedirect.filter(c=>c.name.includes('supabase')||c.name.includes('sb-'))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D'};
+            const supabaseCookiesAtRedirect = cookiesAtRedirect.filter(c=>c.name.includes('supabase')||c.name.includes('sb-'));
+            addDebugInfo(`Executing redirect to / - cookieCount: ${cookiesAtRedirect.length}, supabaseCookies: ${supabaseCookiesAtRedirect.map(c=>c.name).join(', ') || 'none'}`)
+            const logData5 = {location:'app/login/page.tsx:49',message:'Executing redirect',data:{target:'/',cookieCount:cookiesAtRedirect.length,cookies:cookiesAtRedirect,supabaseCookies:supabaseCookiesAtRedirect},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D'};
             console.error('[DEBUG LOGIN]', JSON.stringify(logData5));
             fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData5)}).catch(()=>{});
             // #endregion
@@ -109,6 +120,27 @@ export default function LoginPage() {
         {error && (
           <div className="auth-error">
             {error}
+          </div>
+        )}
+
+        {debugInfo.length > 0 && (
+          <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            background: '#f3f4f6',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            fontSize: '0.85rem',
+            fontFamily: 'monospace'
+          }}>
+            <strong>Debug Info:</strong>
+            <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+              {debugInfo.map((info, idx) => (
+                <li key={idx} style={{ marginBottom: '4px' }}>{info}</li>
+              ))}
+            </ul>
           </div>
         )}
 
