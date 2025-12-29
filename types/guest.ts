@@ -44,7 +44,7 @@ export type SortOption =
   | 'bridesmaid-rating-desc'
   | 'attendance-desc';
 
-export function calculateFinalGrade(guest: Omit<Guest, 'finalGrade'>): Guest['finalGrade'] {
+export function calculateFinalGrade(guest: Omit<Guest, 'id' | 'finalGrade'>): Guest['finalGrade'] {
   const averageRating = (guest.groomRating + guest.bridesmaidRating) / 2;
   const weightedScore = (averageRating * 0.6) + (guest.attendancePossibility * 0.4);
   
