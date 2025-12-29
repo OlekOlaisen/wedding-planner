@@ -31,9 +31,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Refresh the page to ensure middleware picks up the new session
-        // The middleware will handle the redirect to home page
-        window.location.reload()
+        // Ensure session is fully established
+        const { data: sessionData } = await supabase.auth.getSession()
+        
+        if (sessionData.session) {
+          // Wait a bit for cookies to be properly set
+          await new Promise(resolve => setTimeout(resolve, 500))
+          // Redirect to home - middleware will handle if not authenticated
+          window.location.href = '/'
+        } else {
+          // If no session, reload to try again
+          window.location.reload()
+        }
       }
     } catch (err) {
       console.error('Login error:', err)
