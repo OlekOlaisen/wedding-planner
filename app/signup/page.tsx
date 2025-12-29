@@ -43,12 +43,9 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // Ensure session is established and cookies are set
-        await supabase.auth.getSession()
-        // Wait for cookies to be properly set
-        await new Promise(resolve => setTimeout(resolve, 300))
-        // Use full page reload to ensure middleware sees the cookies
-        window.location.href = '/'
+        // Refresh the page to ensure middleware picks up the new session
+        // The middleware will handle the redirect to home page
+        window.location.reload()
       }
     } catch (err) {
       console.error('Signup error:', err)
