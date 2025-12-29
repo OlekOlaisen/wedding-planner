@@ -18,17 +18,27 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+
+      if (data.user) {
+        // Wait a moment for cookies to be set, then redirect
+        await new Promise(resolve => setTimeout(resolve, 100))
+        window.location.href = '/'
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('An unexpected error occurred. Please try again.')
       setLoading(false)
-    } else {
-      router.push('/')
-      router.refresh()
     }
   }
 
