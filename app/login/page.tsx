@@ -31,8 +31,11 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Wait a moment for cookies to be set, then redirect
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Ensure session is established and cookies are set
+        await supabase.auth.getSession()
+        // Wait for cookies to be properly set
+        await new Promise(resolve => setTimeout(resolve, 300))
+        // Use full page reload to ensure middleware sees the cookies
         window.location.href = '/'
       }
     } catch (err) {
