@@ -29,6 +29,8 @@ export async function fetchGuests(): Promise<Guest[]> {
     attendancePossibility: guest.attendance_possibility,
     finalGrade: guest.final_grade,
     notes: guest.notes || undefined,
+    confirmation: guest.confirmation ?? false,
+    inviteSent: guest.invite_sent ?? false,
   }))
 }
 
@@ -53,6 +55,8 @@ export async function addGuest(guestData: Omit<Guest, 'id' | 'finalGrade'>): Pro
       attendance_possibility: guestData.attendancePossibility,
       final_grade: finalGrade,
       notes: guestData.notes || null,
+      confirmation: guestData.confirmation ?? false,
+      invite_sent: guestData.inviteSent ?? false,
     })
     .select()
     .single()
@@ -71,6 +75,8 @@ export async function addGuest(guestData: Omit<Guest, 'id' | 'finalGrade'>): Pro
     attendancePossibility: data.attendance_possibility,
     finalGrade: data.final_grade,
     notes: data.notes || undefined,
+    confirmation: data.confirmation ?? false,
+    inviteSent: data.invite_sent ?? false,
   }
 }
 
@@ -94,6 +100,8 @@ export async function updateGuest(id: string, guestData: Omit<Guest, 'id' | 'fin
       attendance_possibility: guestData.attendancePossibility,
       final_grade: finalGrade,
       notes: guestData.notes || null,
+      confirmation: guestData.confirmation ?? false,
+      invite_sent: guestData.inviteSent ?? false,
     })
     .eq('id', id)
     .eq('user_id', user.id)
@@ -114,6 +122,78 @@ export async function updateGuest(id: string, guestData: Omit<Guest, 'id' | 'fin
     attendancePossibility: data.attendance_possibility,
     finalGrade: data.final_grade,
     notes: data.notes || undefined,
+    confirmation: data.confirmation ?? false,
+    inviteSent: data.invite_sent ?? false,
+  }
+}
+
+export async function toggleGuestConfirmation(id: string, confirmation: boolean): Promise<Guest> {
+  const supabase = createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  const { data, error } = await supabase
+    .from('guests')
+    .update({ confirmation })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error toggling confirmation:', error)
+    throw error
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    category: data.category,
+    groomRating: data.groom_rating,
+    bridesmaidRating: data.bridesmaid_rating,
+    attendancePossibility: data.attendance_possibility,
+    finalGrade: data.final_grade,
+    notes: data.notes || undefined,
+    confirmation: data.confirmation ?? false,
+    inviteSent: data.invite_sent ?? false,
+  }
+}
+
+export async function toggleGuestInviteSent(id: string, inviteSent: boolean): Promise<Guest> {
+  const supabase = createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  const { data, error } = await supabase
+    .from('guests')
+    .update({ invite_sent: inviteSent })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error toggling invite sent:', error)
+    throw error
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    category: data.category,
+    groomRating: data.groom_rating,
+    bridesmaidRating: data.bridesmaid_rating,
+    attendancePossibility: data.attendance_possibility,
+    finalGrade: data.final_grade,
+    notes: data.notes || undefined,
+    confirmation: data.confirmation ?? false,
+    inviteSent: data.invite_sent ?? false,
   }
 }
 

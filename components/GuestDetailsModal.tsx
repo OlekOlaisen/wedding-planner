@@ -12,7 +12,7 @@ interface GuestDetailsModalProps {
 export default function GuestDetailsModal({ guest, onClose, onEdit, onDelete }: GuestDetailsModalProps) {
   const getCategoryColor = (category: Guest['category']) => {
     const colors: Record<Guest['category'], string> = {
-      'Bridal Party': '#ec4899',
+      'Close Family': '#ec4899',
       'Groom\'s Family': '#3b82f6',
       'Bride\'s Family': '#ef4444',
       'Close Friends': '#10b981',
@@ -142,6 +142,34 @@ export default function GuestDetailsModal({ guest, onClose, onEdit, onDelete }: 
               </div>
             </div>
           )}
+
+          <div className="guest-detail-section">
+            <h4>Status</h4>
+            <div className="status-grid">
+              <div className={`status-badge ${guest.inviteSent ? 'status-active' : 'status-inactive'}`}>
+                <div className="status-badge-icon">
+                  {guest.inviteSent ? '✓' : '○'}
+                </div>
+                <div className="status-badge-content">
+                  <span className="status-badge-label">Invite Sent</span>
+                  <span className="status-badge-value">
+                    {guest.inviteSent ? 'Sent' : 'Not Sent'}
+                  </span>
+                </div>
+              </div>
+              <div className={`status-badge ${guest.confirmation ? 'status-active' : 'status-inactive'}`}>
+                <div className="status-badge-icon">
+                  {guest.confirmation ? '✓' : '○'}
+                </div>
+                <div className="status-badge-content">
+                  <span className="status-badge-label">Confirmed</span>
+                  <span className="status-badge-value">
+                    {guest.confirmation ? 'Confirmed' : 'Not Confirmed'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="guest-details-actions">

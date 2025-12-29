@@ -1,5 +1,5 @@
 export type GuestCategory = 
-  | 'Bridal Party'
+  | 'Close Family'
   | 'Groom\'s Family'
   | 'Bride\'s Family'
   | 'Close Friends'
@@ -11,7 +11,7 @@ export type GuestCategory =
   | 'Other';
 
 export const GUEST_CATEGORIES: GuestCategory[] = [
-  'Bridal Party',
+  'Close Family',
   'Groom\'s Family',
   'Bride\'s Family',
   'Close Friends',
@@ -32,6 +32,8 @@ export interface Guest {
   attendancePossibility: number; // 1-10 (1 = unlikely, 10 = very likely)
   finalGrade: 'A' | 'B' | 'C' | 'D' | 'F';
   notes?: string;
+  confirmation: boolean;
+  inviteSent: boolean;
 }
 
 export type SortOption = 

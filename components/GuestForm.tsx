@@ -16,6 +16,8 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
   const [bridesmaidRating, setBridesmaidRating] = useState(5)
   const [attendancePossibility, setAttendancePossibility] = useState(5)
   const [notes, setNotes] = useState('')
+  const [confirmation, setConfirmation] = useState(false)
+  const [inviteSent, setInviteSent] = useState(false)
 
   useEffect(() => {
     if (initialData) {
@@ -25,6 +27,8 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
       setBridesmaidRating(initialData.bridesmaidRating)
       setAttendancePossibility(initialData.attendancePossibility)
       setNotes(initialData.notes || '')
+      setConfirmation(initialData.confirmation)
+      setInviteSent(initialData.inviteSent)
     } else {
       setName('')
       setCategory('Friends')
@@ -32,6 +36,8 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
       setBridesmaidRating(5)
       setAttendancePossibility(5)
       setNotes('')
+      setConfirmation(false)
+      setInviteSent(false)
     }
   }, [initialData])
 
@@ -46,6 +52,8 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
       bridesmaidRating,
       attendancePossibility,
       notes: notes.trim() || undefined,
+      confirmation,
+      inviteSent,
     })
 
     if (!initialData) {
@@ -55,6 +63,8 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
       setBridesmaidRating(5)
       setAttendancePossibility(5)
       setNotes('')
+      setConfirmation(false)
+      setInviteSent(false)
     }
   }
 
@@ -154,6 +164,29 @@ export default function GuestForm({ onSubmit, initialData, onCancel }: GuestForm
           rows={3}
           className="notes-textarea"
         />
+      </div>
+
+      <div className="form-group">
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <label htmlFor="confirmation" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              id="confirmation"
+              type="checkbox"
+              checked={confirmation}
+              onChange={(e) => setConfirmation(e.target.checked)}
+            />
+            Confirmed
+          </label>
+          <label htmlFor="inviteSent" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              id="inviteSent"
+              type="checkbox"
+              checked={inviteSent}
+              onChange={(e) => setInviteSent(e.target.checked)}
+            />
+            Invite Sent
+          </label>
+        </div>
       </div>
 
       <div className="form-actions">

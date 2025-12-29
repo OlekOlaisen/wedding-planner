@@ -144,7 +144,7 @@ export default function Statistics({ guests }: StatisticsProps) {
 
 function getCategoryColor(category: Guest['category']): string {
   const colors: Record<Guest['category'], string> = {
-    'Bridal Party': '#ec4899',
+    'Close Family': '#ec4899',
     'Groom\'s Family': '#3b82f6',
     'Bride\'s Family': '#ef4444',
     'Close Friends': '#10b981',

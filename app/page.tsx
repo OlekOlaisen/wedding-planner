@@ -114,6 +114,12 @@ export default function Home() {
     setEditingGuest(guest)
   }, [])
 
+  const handleGuestUpdate = useCallback((updatedGuest: Guest) => {
+    setGuests((prev) =>
+      prev.map((guest) => (guest.id === updatedGuest.id ? updatedGuest : guest))
+    )
+  }, [])
+
   const handleCancelEdit = useCallback(() => {
     setEditingGuest(null)
   }, [])
@@ -200,6 +206,7 @@ export default function Home() {
             guests={guests}
             onEdit={handleEditGuest}
             onDelete={handleDeleteGuest}
+            onGuestUpdate={handleGuestUpdate}
           />
         </div>
       </div>

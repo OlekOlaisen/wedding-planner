@@ -3,15 +3,18 @@
 import { useState, useMemo } from 'react'
 import { Guest, GUEST_CATEGORIES, GuestCategory, SortOption } from '@/types/guest'
 import GuestDetailsModal from './GuestDetailsModal'
+import { toggleGuestConfirmation, toggleGuestInviteSent } from '@/utils/database'
 
 interface GuestListProps {
   guests: Guest[]
   onEdit: (guest: Guest) => void
   onDelete: (id: string) => void
+  onGuestUpdate?: (guest: Guest) => void
 }
 
-export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) {
+export default function GuestList({ guests, onEdit, onDelete, onGuestUpdate }: GuestListProps) {
   const [selectedCategory, setSelectedCategory] = useState<GuestCategory | 'All'>('All')
+  const [confirmationFilter, setConfirmationFilter] = useState<'All' | 'Confirmed' | 'Not Confirmed'>('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortOption, setSortOption] = useState<SortOption>('name-asc')
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null)
@@ -21,6 +24,14 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
 
     if (selectedCategory !== 'All') {
       filtered = filtered.filter((guest) => guest.category === selectedCategory)
+    }
+
+    if (confirmationFilter !== 'All') {
+      if (confirmationFilter === 'Confirmed') {
+        filtered = filtered.filter((guest) => guest.confirmation === true)
+      } else {
+        filtered = filtered.filter((guest) => guest.confirmation === false)
+      }
     }
 
     if (searchQuery.trim()) {
@@ -59,7 +70,7 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
     })
 
     return sorted
-  }, [guests, selectedCategory, searchQuery, sortOption])
+  }, [guests, selectedCategory, confirmationFilter, searchQuery, sortOption])
 
   if (guests.length === 0) {
     return (
@@ -88,7 +99,7 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
 
   const getCategoryColor = (category: GuestCategory) => {
     const colors: Record<GuestCategory, string> = {
-      'Bridal Party': '#ec4899',
+      'Close Family': '#ec4899',
       'Groom\'s Family': '#3b82f6',
       'Bride\'s Family': '#ef4444',
       'Close Friends': '#10b981',
@@ -100,6 +111,30 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
       'Other': '#6b7280',
     }
     return colors[category] || '#6b7280'
+  }
+
+  const handleToggleConfirmation = async (guest: Guest, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const updatedGuest = await toggleGuestConfirmation(guest.id, !guest.confirmation)
+      if (onGuestUpdate) {
+        onGuestUpdate(updatedGuest)
+      }
+    } catch (error) {
+      console.error('Failed to toggle confirmation:', error)
+    }
+  }
+
+  const handleToggleInviteSent = async (guest: Guest, e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const updatedGuest = await toggleGuestInviteSent(guest.id, !guest.inviteSent)
+      if (onGuestUpdate) {
+        onGuestUpdate(updatedGuest)
+      }
+    } catch (error) {
+      console.error('Failed to toggle invite sent:', error)
+    }
   }
 
   return (
@@ -131,6 +166,19 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
                   {category}
                 </option>
               ))}
+            </select>
+          </div>
+          <div className="filter-group">
+            <label htmlFor="confirmation-filter">Confirmed:</label>
+            <select
+              id="confirmation-filter"
+              value={confirmationFilter}
+              onChange={(e) => setConfirmationFilter(e.target.value as 'All' | 'Confirmed' | 'Not Confirmed')}
+              className="category-filter-select"
+            >
+              <option value="All">All</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Not Confirmed">Not Confirmed</option>
             </select>
           </div>
           <div className="filter-group">
@@ -166,6 +214,8 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
             <th>Bridesmaid Rating</th>
             <th>Attendance Possibility</th>
             <th>Final Grade</th>
+            <th>Invite Sent</th>
+            <th>Confirmed</th>
           </tr>
         </thead>
         <tbody>
@@ -197,6 +247,22 @@ export default function GuestList({ guests, onEdit, onDelete }: GuestListProps) 
                 >
                   {guest.finalGrade}
                 </span>
+              </td>
+              <td onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={guest.inviteSent}
+                  onChange={(e) => handleToggleInviteSent(guest, e)}
+                  style={{ cursor: 'pointer' }}
+                />
+              </td>
+              <td onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={guest.confirmation}
+                  onChange={(e) => handleToggleConfirmation(guest, e)}
+                  style={{ cursor: 'pointer' }}
+                />
               </td>
             </tr>
           ))}

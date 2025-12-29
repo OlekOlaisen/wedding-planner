@@ -8,8 +8,8 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -161,15 +161,22 @@ a {
 .category-select,
 .category-filter-select,
 .sort-select {
-  padding: 12px 16px;
+  padding: 12px 32px 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 1rem;
   background: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
   color: #1f2937;
   cursor: pointer;
   transition: border-color 0.2s;
   font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .category-select:focus,
@@ -356,6 +363,15 @@ a {
   font-size: 0.85rem;
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+.guest-table td:nth-child(2) {
+  text-align: center;
+}
+
+.guest-table td:nth-child(2) .category-badge {
+  display: inline-block;
 }
 
 .guest-table {
@@ -369,8 +385,8 @@ a {
 }
 
 .guest-table th {
-  padding: 16px;
-  text-align: left;
+  padding: 16px 12px;
+  text-align: center;
   font-weight: 600;
   color: #374151;
   font-size: 0.9rem;
@@ -379,10 +395,20 @@ a {
   border-bottom: 2px solid #e5e7eb;
 }
 
+.guest-table th:first-child {
+  text-align: left;
+}
+
 .guest-table td {
-  padding: 16px;
+  padding: 16px 12px;
   border-bottom: 1px solid #e5e7eb;
   color: #1f2937;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.guest-table td:first-child {
+  text-align: left;
 }
 
 .guest-table tbody tr.guest-row {
@@ -401,12 +427,22 @@ a {
 .name-cell {
   font-weight: 600;
   color: #1f2937;
+  text-align: left !important;
 }
 
 .name-cell > div {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.guest-table td input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 0 auto;
+  display: block;
+  accent-color: #3b82f6;
 }
 
 .has-notes {
@@ -416,17 +452,17 @@ a {
 }
 
 .grade-badge {
-  display: inline-block;
+  display: inline-flex;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   color: white;
   font-weight: 700;
   font-size: 1rem;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin: 0 auto;
 }
 
 .action-buttons {
@@ -971,6 +1007,11 @@ a {
   font-size: 1rem;
 }
 
+.detail-item .category-badge,
+.detail-item .grade-badge {
+  margin: 0 0 0 auto !important;
+}
+
 .ratings-grid {
   display: grid;
   gap: 16px;
@@ -1030,6 +1071,89 @@ a {
   color: #374151;
   line-height: 1.6;
   border-left: 3px solid #3b82f6;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.status-badge.status-active {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+.status-badge.status-inactive {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.status-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.status-badge.status-active .status-badge-icon {
+  background: #10b981;
+  color: white;
+}
+
+.status-badge.status-inactive .status-badge-icon {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.status-badge-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.status-badge-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-active .status-badge-label {
+  color: #059669;
+}
+
+.status-badge-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.status-badge.status-active .status-badge-value {
+  color: #10b981;
+}
+
+.status-badge.status-inactive .status-badge-value {
+  color: #6b7280;
 }
 
 .guest-details-actions {
@@ -1228,4 +1352,3 @@ a {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
 }
-
