@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { writeFileSync } from 'fs'
+import { join } from 'path'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -12,7 +14,11 @@ export async function middleware(request: NextRequest) {
   // #region agent log
   const allCookies = request.cookies.getAll();
   const supabaseCookies = allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-'));
-  fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:4',message:'Middleware entry',data:{pathname,isAuthPage,hostname:request.nextUrl.hostname,protocol:request.nextUrl.protocol,totalCookies:allCookies.length,supabaseCookieCount:supabaseCookies.length,supabaseCookieNames:supabaseCookies.map(c=>c.name)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C,D'})}).catch(()=>{});
+  const logData = {location:'middleware.ts:4',message:'Middleware entry',data:{pathname,isAuthPage,hostname:request.nextUrl.hostname,protocol:request.nextUrl.protocol,totalCookies:allCookies.length,supabaseCookieCount:supabaseCookies.length,supabaseCookieNames:supabaseCookies.map(c=>c.name)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C,D'};
+  const logEntry = JSON.stringify(logData) + '\n';
+  try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry, { flag: 'a' }); } catch {}
+  console.error('[DEBUG]', JSON.stringify(logData));
+  supabaseResponse.headers.set('X-Debug-Middleware-Entry', JSON.stringify({pathname,supabaseCookieCount:supabaseCookies.length}));
   // #endregion
 
   const supabase = createServerClient(
@@ -25,7 +31,10 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:17',message:'setAll called',data:{cookieCount:cookiesToSet.length,cookieNames:cookiesToSet.map(c=>c.name),options:cookiesToSet.map(c=>({name:c.name,domain:c.options?.domain,path:c.options?.path,sameSite:c.options?.sameSite,secure:c.options?.secure}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
+          const logData2 = {location:'middleware.ts:17',message:'setAll called',data:{cookieCount:cookiesToSet.length,cookieNames:cookiesToSet.map(c=>c.name),options:cookiesToSet.map(c=>({name:c.name,domain:c.options?.domain,path:c.options?.path,sameSite:c.options?.sameSite,secure:c.options?.secure}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'};
+          const logEntry = JSON.stringify(logData2) + '\n';
+          try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry, { flag: 'a' }); } catch {}
+          console.error('[DEBUG]', JSON.stringify(logData2));
           // #endregion
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
@@ -45,31 +54,49 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:33',message:'getUser result',data:{hasUser:!!user,userId:user?.id,userEmail:user?.email,pathname,isAuthPage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+  const logData3 = {location:'middleware.ts:33',message:'getUser result',data:{hasUser:!!user,userId:user?.id,userEmail:user?.email,pathname,isAuthPage},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'};
+  const logEntry2 = JSON.stringify(logData3) + '\n';
+  try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry2, { flag: 'a' }); } catch {}
+  console.error('[DEBUG]', JSON.stringify(logData3));
+  supabaseResponse.headers.set('X-Debug-User', JSON.stringify({hasUser:!!user,pathname}));
   // #endregion
 
   // Redirect unauthenticated users to login (except for login/signup pages)
   if (!user && !isAuthPage) {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:39',message:'Redirecting to login - no user',data:{pathname,reason:'no_user'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+    const logData4 = {location:'middleware.ts:39',message:'Redirecting to login - no user',data:{pathname,reason:'no_user'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'};
+    const logEntry3 = JSON.stringify(logData4) + '\n';
+    try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry3, { flag: 'a' }); } catch {}
+    console.error('[DEBUG]', JSON.stringify(logData4));
     // #endregion
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    redirectResponse.headers.set('X-Debug-Redirect', 'to-login-no-user')
+    return redirectResponse
   }
 
   // Redirect authenticated users away from login/signup pages
   if (user && isAuthPage) {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:46',message:'Redirecting to home - user authenticated',data:{pathname,userId:user.id,reason:'authenticated_on_auth_page'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+    const logData5 = {location:'middleware.ts:46',message:'Redirecting to home - user authenticated',data:{pathname,userId:user.id,reason:'authenticated_on_auth_page'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'};
+    const logEntry4 = JSON.stringify(logData5) + '\n';
+    try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry4, { flag: 'a' }); } catch {}
+    console.error('[DEBUG]', JSON.stringify(logData5));
     // #endregion
     const url = request.nextUrl.clone()
     url.pathname = '/'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    redirectResponse.headers.set('X-Debug-Redirect', 'to-home-authenticated')
+    return redirectResponse
   }
 
   // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/d9aea05c-d274-46a3-8b91-b94b9b6e2e67',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'middleware.ts:52',message:'Middleware allowing request',data:{pathname,hasUser:!!user},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+  const logData6 = {location:'middleware.ts:52',message:'Middleware allowing request',data:{pathname,hasUser:!!user},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'};
+  const logEntry5 = JSON.stringify(logData6) + '\n';
+  try { writeFileSync(join(process.cwd(), '.cursor', 'debug.log'), logEntry5, { flag: 'a' }); } catch {}
+  console.error('[DEBUG]', JSON.stringify(logData6));
+  supabaseResponse.headers.set('X-Debug-Allow', JSON.stringify({pathname,hasUser:!!user}));
   // #endregion
 
   return supabaseResponse
