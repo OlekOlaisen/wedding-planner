@@ -43,17 +43,25 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // Ensure session is fully established
-        const { data: sessionData } = await supabase.auth.getSession()
+        // Verify session is established
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (sessionData.session) {
-          // Wait a bit for cookies to be properly set
-          await new Promise(resolve => setTimeout(resolve, 500))
-          // Redirect to home - middleware will handle if not authenticated
-          window.location.href = '/'
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          setError('Failed to establish session. Please try again.')
+          setLoading(false)
+          return
+        }
+        
+        if (session) {
+          // Wait for cookies to be set by the browser client
+          // Then do a full page reload to ensure middleware sees the cookies
+          setTimeout(() => {
+            window.location.href = '/'
+          }, 200)
         } else {
-          // If no session, reload to try again
-          window.location.reload()
+          setError('Session not established. Please try again.')
+          setLoading(false)
         }
       }
     } catch (err) {
