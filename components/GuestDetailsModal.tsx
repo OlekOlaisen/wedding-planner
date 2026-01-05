@@ -162,7 +162,7 @@ export default function GuestDetailsModal({ guest, onClose, onEdit, onDelete }: 
                   {guest.confirmation ? '✓' : '○'}
                 </div>
                 <div className="status-badge-content">
-                  <span className="status-badge-label">Confirmed</span>
+                  <span className="status-badge-label">Confirmation</span>
                   <span className="status-badge-value">
                     {guest.confirmation ? 'Confirmed' : 'Not Confirmed'}
                   </span>
